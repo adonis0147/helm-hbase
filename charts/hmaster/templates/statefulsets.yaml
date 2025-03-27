@@ -1,0 +1,45 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: hm
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: hmaster
+  serviceName: hmaster
+  replicas: {{ .Values.global.num_hmaster_replicas }}
+  template:
+    metadata:
+      labels:
+        app: hmaster
+    spec:
+      containers:
+        - name: hm
+          image: {{ .Values.global.image }}
+          imagePullPolicy: Never
+          env:
+            - name: HBASE_ROOT_LOGGER
+              value: INFO,DRFA,console
+          command:
+            - hbase
+            - master
+            - start
+          volumeMounts:
+            - name: hbase-conf
+              mountPath: /home/hbase/hbase-current/conf/hbase-site.xml
+              subPath: hbase-site.xml
+            - name: hdfs-conf
+              mountPath: /home/hbase/hbase-current/conf/hdfs-site.xml
+              subPath: hdfs-site.xml
+            - name: hdfs-conf
+              mountPath: /home/hbase/hbase-current/conf/core-site.xml
+              subPath: core-site.xml
+      volumes:
+        - name: hbase-conf
+          configMap:
+            name: hbase-conf
+        - name: hdfs-conf
+          configMap:
+            name: hdfs-conf

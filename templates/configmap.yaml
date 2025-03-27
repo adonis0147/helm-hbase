@@ -1,0 +1,28 @@
+# https://kubernetes.io/docs/concepts/configuration/configmap/
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hbase-conf
+  namespace: default
+data:
+  hbase-site.xml: |
+    <?xml version="1.0"?>
+    <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+    <configuration>
+        <property>
+            <name>hbase.rootdir</name>
+            <value>hdfs://{{ .Values.default_fs }}:8020/hbase</value>
+        </property>
+        <property>
+            <name>hbase.cluster.distributed</name>
+            <value>true</value>
+        </property>
+        <property>
+            <name>hbase.zookeeper.quorum</name>
+            {{- $zk_list := list }}
+            {{- range $i := until (int .Values.num_zookeeper_replicas )}}
+              {{- $zk_list = append $zk_list (printf "zk-%d.zookeeper" $i) }}
+            {{- end }}
+            <value>{{ join "," $zk_list }}</value>
+        </property>
+    </configuration>

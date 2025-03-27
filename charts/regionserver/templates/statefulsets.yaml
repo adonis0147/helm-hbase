@@ -1,0 +1,47 @@
+# https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rs
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      app: regionserver
+  serviceName: regionserver
+  replicas: {{ .Values.global.num_regionserver_replicas }}
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container:  regionserver
+      labels:
+        app: regionserver
+    spec:
+      containers:
+        - name: rs
+          image: {{ .Values.global.image }}
+          imagePullPolicy: Never
+          env:
+            - name: HBASE_ROOT_LOGGER
+              value: INFO,DRFA,console
+          command:
+            - hbase
+            - regionserver
+            - start
+          volumeMounts:
+            - name: hbase-conf
+              mountPath: /home/hbase/hbase-current/conf/hbase-site.xml
+              subPath: hbase-site.xml
+            - name: hdfs-conf
+              mountPath: /home/hbase/hbase-current/conf/hdfs-site.xml
+              subPath: hdfs-site.xml
+            - name: hdfs-conf
+              mountPath: /home/hbase/hbase-current/conf/core-site.xml
+              subPath: core-site.xml
+      volumes:
+        - name: hbase-conf
+          configMap:
+            name: hbase-conf
+        - name: hdfs-conf
+          configMap:
+            name: hdfs-conf

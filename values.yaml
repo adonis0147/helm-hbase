@@ -1,0 +1,7 @@
+default_fs: hadoop-cluster
+num_zookeeper_replicas: 3
+
+global:
+  image: local/hbase:latest
+  num_hmaster_replicas: 2
+  num_regionserver_replicas: 3
