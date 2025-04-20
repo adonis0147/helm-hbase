@@ -1,4 +1,4 @@
-# Helm-hadoop
+# Helm-hbase
 
 ## Usage
 
