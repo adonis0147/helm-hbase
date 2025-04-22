@@ -58,10 +58,11 @@ helm install --name-template=hadoop .
 #### Access Services
 ```shell
 # Set DNS up
-sudo resolvectl dns "$(ip route | grep "$(minikube ip)" | head -1 | awk '{print $NF}')" \
+interface="$(netstat -nr | grep "$(minikube ip | sed -n 's/\(.*\)\..*/\1.0/p')" |
+    awk '{print $NF}')"
+sudo resolvectl dns "${interface}" \
     "$(kubectl get -n kube-system service --no-headers | awk '{print $3}')"
-sudo resolvectl domain "$(ip route | grep "$(minikube ip)" | head -1 | awk '{print $NF}')" \
-    cluster.local
+sudo resolvectl domain "${interface}" cluster.local
 
 # Set route up
 sudo route del -net 10.244.0.0 netmask 255.255.0.0
